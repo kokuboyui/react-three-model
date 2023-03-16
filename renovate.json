@@ -17,7 +17,5 @@
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "dependencies (non-major)"
     }
-  ],
-  "assignees": ["junichi-h", "angedessin"],
-  "reviewers": ["junichi-h", "angedessin"]
+  ]
 }

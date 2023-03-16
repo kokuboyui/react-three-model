@@ -26,7 +26,6 @@
 First, clone the repo via git:
 
 ```bash
-git@github.com:junichi-h/nextjs-starter.git
 ```
 
 ### Install yarn
