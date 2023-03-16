@@ -1,0 +1,77 @@
+@use 'abstracts/index' as *;
+
+.container {
+  border-radius: 0 0 50% 50%;
+  display: block;
+  height: vw(42px);
+  overflow: hidden;
+  position: fixed;
+  right: vw(16px);
+  top: 0;
+  width: vw(40px);
+  z-index: 100;
+}
+
+.inner {
+  background-color: $color-ui-primary;
+  display: block;
+  height: 100%;
+  position: relative;
+  width: 100%;
+}
+
+.wrapper {
+  display: block;
+  height: vw(22px);
+  left: vw(9px);
+  position: relative;
+  top: vw(11px);
+  width: vw(22px);
+
+  &[data-is-open='true'] {
+    > span {
+      background-color: $color-ui-secondary;
+      height: vw(2px);
+      left: 0;
+      position: absolute;
+      width: 100%;
+
+      &:first-of-type {
+        top: vw(10px);
+        transform: rotate(45deg);
+      }
+
+      &:nth-of-type(2) {
+        opacity: 0;
+      }
+
+      &:nth-of-type(3) {
+        top: vw(10px);
+        transform: rotate(-45deg);
+      }
+    }
+  }
+
+  > span {
+    background-color: $color-ui-secondary;
+    height: vw(2px);
+    left: 0;
+    position: absolute;
+    transition-duration: 0.3s;
+    transition-property: top transform;
+    width: 100%;
+
+    &:first-of-type {
+      top: vw(4px);
+    }
+
+    &:nth-of-type(2) {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    &:nth-of-type(3) {
+      top: vw(16px);
+    }
+  }
+}

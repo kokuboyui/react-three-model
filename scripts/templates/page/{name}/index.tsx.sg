@@ -1,0 +1,3 @@
+import { {{name_pc}} } from '../../../components/page/{{name}}';
+
+export default { {{name_pc}} };

@@ -1,0 +1,243 @@
+@use 'variables' as *;
+@use 'functions' as *;
+@use 'sass:math';
+@use 'sass:map';
+@use 'sass:string';
+@use 'sass:list';
+
+// ブレイクポイントのmixin
+@mixin mq($size) {
+  @if map-has-key($breakpoints, $size) {
+    @media screen and #{inspect(map-get($breakpoints, $size))} {
+      @content;
+    }
+  } @else {
+    // マップ型で定義されていない値が呼び出された時はエラーを返す
+    @error '指定されたブレークポイントは定義されていません。' + '指定できるブレークポイントは次のとおりです。 -> #{map-keys($breakpoints)}';
+  }
+}
+
+// hover用のmixin
+@mixin hover($ie: false) {
+  @media (hover) {
+    &:hover {
+      @content;
+    }
+  }
+
+  @if $ie {
+    @at-root .ua-ie &:hover {
+      @content;
+    }
+  }
+}
+
+// font-face取得用のmixin
+@mixin font-face(
+  $family,
+  $path,
+  $weight: normal,
+  $style: normal,
+  $exts: eot woff2 woff ttf svg
+) {
+  $src: null;
+  $extmods: (
+    eot: '?',
+    svg: '#' + str-replace($family, ' ', '_'),
+  );
+  $formats: (
+    otf: 'opentype',
+    ttf: 'truetype',
+  );
+
+  @each $ext in $exts {
+    $extmod: if(
+      map.has-key($extmods, $ext),
+      $ext + map.get($extmods, $ext),
+      $ext
+    );
+    $format: if(map.has-key($formats, $ext), map.get($formats, $ext), $ext);
+    $src: list.append(
+      $src,
+      url("#{quote($path + '.' + $extmod)}") format(string.quote($format)),
+      comma
+    );
+  }
+
+  @font-face {
+    font-family: string.quote($family);
+    font-style: $style;
+    font-weight: $weight;
+    src: $src;
+  }
+}
+
+// 文章の行数を制限して三点リーダーを表示
+@mixin line-clamp($count: 3) {
+  // 引数が数値以外だったらエラーを返す
+  @if type-of($count) != 'number' {
+    @error 'line-clampの引数は必ず数値で指定してください';
+  }
+
+  @if $count == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: $count;
+    display: box;
+    overflow: hidden;
+  }
+}
+
+// object-fit用のmixin
+@mixin object-fit($value: fill, $position: null) {
+  object-fit: $value;
+
+  @if $position {
+    font-family: 'object-fit: #{$value}; object-position: #{$position}',
+      sans-serif;
+    object-position: $position;
+  } @else {
+    font-family: 'object-fit: #{$value}', sans-serif;
+  }
+}
+
+// 画像などを縦横比を維持したままレスポンシブ対応
+@mixin aspect-ratio($width, $height) {
+  position: relative;
+
+  &::before {
+    content: '';
+    float: left;
+    padding-top: math.div($height, $width) * 100%;
+  }
+
+  &::after {
+    clear: both;
+    content: '';
+    display: table;
+  }
+
+  & > :first-child {
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
+}
+
+// 三角形の作成
+@mixin triangle($direction, $width, $height, $color: currentColor) {
+  // 定義されている方向が指定されている、もしくは方向が指定されていなかったらエラーを返す
+  @if not
+    index(
+      upward
+        rightward
+        downward
+        leftward
+        upper-left
+        upper-right
+        lower-right
+        lower-left,
+      $direction
+    )
+  {
+    @error 'triangle()の方向は"upward","rightward","downward","leftward","upper-left","upper-right","lower-right","lower-left"から指定してください';
+  }
+
+  border-style: solid;
+  height: 0;
+  width: 0;
+
+  @if $direction == upward {
+    border-color: transparent transparent $color transparent;
+    border-width: 0 ($width / 2) $height ($width / 2);
+  }
+
+  @if $direction == rightward {
+    border-color: transparent transparent transparent $color;
+    border-width: ($height / 2) 0 ($height / 2) $width;
+  }
+
+  @if $direction == downward {
+    border-color: $color transparent transparent transparent;
+    border-width: $height ($width / 2) 0 ($width / 2);
+  }
+
+  @if $direction == leftward {
+    border-color: transparent $color transparent transparent;
+    border-width: ($height / 2) $width ($height / 2) 0;
+  }
+
+  @if $direction == upper-left {
+    border-color: $color transparent transparent transparent;
+    border-width: $height $height 0 0;
+  }
+
+  @if $direction == upper-right {
+    border-color: transparent $color transparent transparent;
+    border-width: 0 $height $height 0;
+  }
+
+  @if $direction == lower-right {
+    border-color: transparent transparent $color transparent;
+    border-width: 0 0 $height $height;
+  }
+
+  @if $direction == lower-left {
+    border-color: transparent transparent transparent $color;
+    border-width: $height 0 0 $height;
+  }
+}
+
+// アニメーションパフォーマンスの向上
+@mixin gpu {
+  backface-visibility: hidden;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+
+  .safari & {
+    perspective: none;
+  }
+}
+
+// flexの中央揃え
+@mixin flex-center {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+// width, heightの設定
+@mixin box($width, $height: $width) {
+  height: $height;
+  width: $width;
+}
+
+// transformの中央揃え
+@mixin transform-center {
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+// 縦方向のtransformの中央揃え
+@mixin transform-center-vert {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+// 横方向のtransformの中央揃え
+@mixin transform-center-horiz {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+// インラインsvgの余白を削除
+@mixin inline-svg {
+  font-size: 0;
+  line-height: 0;
+}
